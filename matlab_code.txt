@@ -1,0 +1,35 @@
+A = {0,87,117,78,105,59,54,50,93,91;87,0,112,88,87,102,95,85,68,65;117,112,0,117,140,177,74,12,124,175;78,88,117,0,112,83,49,45,62,60;105,87,140,112,0,155,94,78,81,106;59,102,177,83,155,0,64,54,15,100;54,95,74,49,94,64,0,76,23,71;50,85,12,45,78,54,76,0,8,23;93,68,124,62,81,15,23,8,0,111;91,65,175,60,106,100,71,23,111,0}
+%%conductance matrix
+B = cell2mat(A)
+C = -1.*B;
+S = sum(B,2);
+X = diag(S);
+G = C+X;
+[V,D] = eig(G);
+for i =2:10
+    D(i,i) = 1/D(i,i);
+end
+Gplus = V*D*transpose(V);
+e = [1 1 1 1 1 1 1 1 1 1]'
+R = e*transpose(diag(Gplus))+ diag(Gplus)*transpose(e) -2.*Gplus;
+
+Centrality = [0 0 0 0 0 0 0 0 0 0]
+for i = 1:10
+    Centrality(i) = 10 / (10*Gplus(i,i) + trace(Gplus))
+end
+
+betweenness=[0 0 0 0 0 0 0 0 0 0]
+for s = 1:10
+   for t = 1:10
+      if (s ~= t)
+          for i = 1:10
+              x = 0;
+              for j = 1:10
+                 x = x + B(i,j)*abs(Gplus(i,s)-Gplus(j,s)+Gplus(j,t)-Gplus(i,t));  
+              end
+             betweenness(i) = betweenness(i) + 1/2*x;
+          end
+      end
+   end
+end
+betweenness=1/90.*betweenness
